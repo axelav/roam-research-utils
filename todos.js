@@ -87,8 +87,7 @@ const writeTodos = (todos, page_uid) => {
   })
 }
 
-const getRoamDate = (dt) => {
-  // Month Dth, YYYY
+const getRoamDate = (d) => {
   const months = [
     'January',
     'February',
@@ -105,30 +104,24 @@ const getRoamDate = (dt) => {
   ]
 
   let text = 'Month Dth, YYYY' // default format
-  const date = new Date(dt)
+
+  const date = new Date(d)
   date.setHours(12, 0, 0, 0)
-  const today = new Date()
-  today.setHours(12, 0, 0, 0)
 
   // YYYY
-  text = text.replace(/YYYY/g, function () {
-    return date.getFullYear()
-  })
+  text = text.replace(/YYYY/g, () => date.getFullYear())
 
   // Month
-  text = text.replace(/Month/g, function () {
-    return months[date.getMonth()]
-  })
+  text = text.replace(/Month/g, () => months[date.getMonth()])
 
   // D
-  text = text.replace(/D(?!e)/g, function () {
-    return date.getDate()
-  })
+  text = text.replace(/D(?!e)/g, () => date.getDate())
 
   // th
-  text = text.replace(/(\d+)\s*(th|st|nd|rd)/g, function (_, number) {
-    var str = number.substr(-2)
-    var suffix
+  text = text.replace(/(\d+)\s*(th|st|nd|rd)/g, (_, number) => {
+    const str = number.substr(-2)
+    let suffix
+
     switch (str.substr(-1)) {
       case '1':
         suffix = 'st'
