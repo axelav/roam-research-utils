@@ -118,7 +118,10 @@ const addRelease = (release, page_uid) => {
   } = release
   const tags = [...genres, ...styles]
 
-  const artistsJoined = artists.map(({ name }) => name).join(artists.join)
+  const artistsJoined = artists.reduce(
+    (prev, x) => `${prev}${x.name}${!!x.join ? ` ${x.join} ` : ''}`,
+    ''
+  )
   const mainText = `${artistsJoined}, __${title}__ ([[${year}]])`
   const label = labels[0]?.name || '[[Not On Label]]'
 
