@@ -17,12 +17,12 @@
 //
 // ## TODO
 //
-// - better message to user when no results; only logs to console currently
+// - add album art?
 
 const token = ''
 
 if (window.discogsBtn) {
-  document.removeEventListener(discogsBtn.handleClick)
+  document.removeEventListener('click', discogsBtn.handleClick)
 } else {
   window.discogsBtn = {}
 }

@@ -23,7 +23,7 @@ const LAT = ''
 const LON = ''
 
 if (window.weatherBtn) {
-  document.removeEventListener(weatherBtn.handleClick)
+  document.removeEventListener('click', weatherBtn.handleClick)
 } else {
   window.weatherBtn = {}
 }

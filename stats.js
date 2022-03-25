@@ -1,5 +1,5 @@
 if (window.statsBtn) {
-  document.removeEventListener(statsBtn.handleClick)
+  document.removeEventListener('click', statsBtn.handleClick)
 } else {
   window.statsBtn = {}
 }

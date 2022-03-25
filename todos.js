@@ -5,7 +5,7 @@
 // - make it work
 
 if (window.agendaBtn) {
-  document.removeEventListener(agendaBtn.handleClick)
+  document.removeEventListener('click', agendaBtn.handleClick)
 } else {
   window.agendaBtn = {}
 }

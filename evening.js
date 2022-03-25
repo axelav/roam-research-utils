@@ -1,5 +1,5 @@
 if (window.eveningBtn) {
-  document.removeEventListener(eveningBtn.handleClick)
+  document.removeEventListener('click', eveningBtn.handleClick)
 } else {
   window.eveningBtn = {}
 }
