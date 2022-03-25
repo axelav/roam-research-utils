@@ -1,8 +1,11 @@
-// stole these fns from roam/js, mostly wanted the queries
-// https://github.com/dvargas92495/roamjs-smartblocks/blob/9ca306e9299f7c015733aa86d258f144ea82f867/src/smartblocks.ts#L441
+// # Roam Research `{{Daily Agenda}}`
 //
-// TODO
-// - make it work
+// Use a `{{Daily Agenda}}` button to find all TODOs in your graph associated
+// with the current date.
+//
+// ## TODO
+//
+// - add overdue TODOs?
 
 if (window.agendaBtn) {
   document.removeEventListener('click', agendaBtn.handleClick)
@@ -16,10 +19,20 @@ agendaBtn.handleClick = async (e) => {
 
     if (!block) return
 
-    const uid = block.id.substring(block.id.length - 9)
+    const currentBlockUid = block.id.substring(block.id.length - 9)
     const content = await window.roamAlphaAPI
-      .q(`[:find (pull ?block [:block/string]) 
-          :where [?block :block/uid "${uid}"]]`)[0][0].string
+      .q(`[:find (pull ?block [:block/string])
+          :where [?block :block/uid "${currentBlockUid}"]]`)[0][0].string
+
+    // TODO handle this in query above
+    const parents = await window.roamAlphaAPI
+      .q(`[:find (pull ?b [:block/parents])
+          :where [?b :block/uid "${currentBlockUid}"]]`)[0][0].parents
+
+    const parentUid = await window.roamAlphaAPI.pull(
+      '[:block/uid]',
+      parents[parents.length - 1].id
+    )[':block/uid']
 
     if (!content) return
 
@@ -31,7 +44,7 @@ agendaBtn.handleClick = async (e) => {
     const [_, btnText] = result
 
     if (btnText === `{{Daily Agenda}}`) {
-      addData(uid)
+      addData(currentBlockUid, parentUid)
     }
   }
 }
@@ -41,16 +54,18 @@ document.addEventListener('click', agendaBtn.handleClick, false)
 const getTodayTodos = () => {
   const today = getRoamDate(new Date())
 
+  // stole this query from roam/js
+  // https://github.com/dvargas92495/roamjs-smartblocks/blob/9ca306e9299f7c015733aa86d258f144ea82f867/src/smartblocks.ts#L716
   const todos = window.roamAlphaAPI
     .q(
-      `[:find ?u ?s :where 
-            [?r :block/uid ?u] [?r :block/string ?s] 
-              (or-join [?r ?d] 
-                (and [?r :block/refs ?d]) 
-                (and [?r :block/page ?d]) 
-                (and [?r :block/parents ?c] [?c :block/refs ?d]) 
+      `[:find ?u ?s :where
+            [?r :block/uid ?u] [?r :block/string ?s]
+              (or-join [?r ?d]
+                (and [?r :block/refs ?d])
+                (and [?r :block/page ?d])
+                (and [?r :block/parents ?c] [?c :block/refs ?d])
                 (and [?c :block/refs ?d] [?c :block/parents ?r])
-              ) 
+              )
             [?r :block/refs ?p] [?p :node/title "TODO"] [?d :node/title "${today}"]
         ]`
     )
@@ -59,23 +74,18 @@ const getTodayTodos = () => {
   return todos
 }
 
-const addData = async (uid) => {
+const addData = async (currentBlockUid, parentUid) => {
   const todos = getTodayTodos()
 
   if (todos.length > 0) {
-    writeTodos(todos, uid)
+    writeTodos(todos, currentBlockUid, parentUid)
   } else {
     console.log(`Daily Agenda :: No Results`)
   }
 }
 
-const writeTodos = (todos, page_uid) => {
-  window.roamAlphaAPI.updateBlock({
-    block: {
-      uid: page_uid,
-      string: `[[agenda]]`,
-    },
-  })
+const writeTodos = (todos, uid, page_uid) => {
+  window.roamAlphaAPI.deleteBlock({ block: { uid } })
 
   todos.map((x, i) => {
     window.roamAlphaAPI.createBlock({
@@ -135,6 +145,7 @@ const getRoamDate = (d) => {
       default:
         suffix = 'th'
     }
+
     // th for all `1X` numbers
     if (str.length > 1 && str[0] == 1) {
       suffix = 'th'
@@ -144,3 +155,27 @@ const getRoamDate = (d) => {
 
   return text
 }
+
+// TODO ??
+// const openQuickCaptureSidebar = async () => {
+//   const yesterdaysQuickCapture = window.roamAlphaAPI
+//     .q(
+//       `[:find ?u ?s :where
+//             [?r :block/uid ?u] [?r :block/string ?s]
+//               (or-join [?r ?d]
+//                 (and [?r :block/refs ?d])
+//                 (and [?r :block/page ?d])
+//                 (and [?r :block/parents ?c] [?c :block/refs ?d])
+//                 (and [?c :block/refs ?d] [?c :block/parents ?r])
+//               )
+//             [?r :block/refs ?p] [?p :node/title "TODO"] [?d :node/title "${today}"]
+//         ]`
+//     )
+//     .map(([uid, text]) => ({ uid, text }))
+
+//   console.log('yesterdaysQuickCapture', yesterdaysQuickCapture[0].uid)
+
+//   // await window.roamAlphaAPI.ui.rightSidebar.addWindow({
+//   //   window: { type: 'block', 'block-uid': yesterdaysQuickCapture[0].uid },
+//   // })
+// }
