@@ -19,7 +19,7 @@
 //
 // - add album art?
 
-const token = ''
+const token = 'wTZrZpQTuVShdcZbXOBSGTolycMefQUPwEEHURon'
 
 if (window.discogsBtn) {
   document.removeEventListener('click', discogsBtn.handleClick)
@@ -138,7 +138,7 @@ const addRelease = (release, page_uid) => {
   window.roamAlphaAPI.createBlock({
     location: { 'parent-uid': page_uid, order: 2 },
     block: {
-      string: `tags:: #album ${tags.filter(unique).map(writeTag).join(' ')}`,
+      string: `tags:: #albums ${tags.filter(unique).map(writeTag).join(' ')}`,
     },
   })
 

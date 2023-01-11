@@ -20,11 +20,12 @@
 // ## Notes
 //
 // - I attempted to use the Geolocation API but it does not seem to work within Roam.
+// 6/13/22 - This may have been some browser issue or perhaps I was blocking location access for the app. Try again.
 
-const WEATHER_API_TOKEN = ''
-const GOOGLE_MAPS_API_KEY = ''
-const DEFAULT_LATITUDE = ''
-const DEFAULT_LONGITUDE = ''
+const WEATHER_API_TOKEN = '3faec6b9127899a1c7136599eea02952'
+const GOOGLE_MAPS_API_KEY = 'AIzaSyD1pT--8ooS5v26dNgTTciXpEkpneqyyJA'
+const DEFAULT_LATITUDE = '40.671082'
+const DEFAULT_LONGITUDE = '-73.951625'
 
 if (window.weatherBtn) {
   document.removeEventListener('click', weatherBtn.handleClick)
@@ -53,7 +54,7 @@ weatherBtn.handleClick = async (e) => {
     const [_, btnText, query] = result
 
     if (btnText === `{{Daily Weather}}`) {
-      addData(query, uid)
+      addData(query.trim(), uid)
     }
   }
 }
@@ -76,6 +77,23 @@ const getWeather = async ({ latitude, longitude }) => {
   } catch (err) {
     console.error(`Daily Weather :: Error fetching weather`, err)
   }
+
+  // TODO: https://openweathermap.org/api/one-call-3#history
+  // try {
+  //   const res = await fetch(
+  //     `https://api.openweathermap.org/data/3.0/onecall/timemachine?lat=${latitude}&lon=${longitude}&dt=${time}&appid=${WEATHER_API_TOKEN}`
+  //   )
+
+  //   if (!res.ok) {
+  //     const text = await res.text()
+
+  //     return Promise.reject(text)
+  //   } else {
+  //     return await res.json()
+  //   }
+  // } catch (err) {
+  //   console.error(`Daily Weather :: Error fetching weather`, err)
+  // }
 }
 
 const getAddress = async ({ latitude, longitude }) => {
@@ -103,6 +121,8 @@ const addWeather = (currentDay, page_uid) => {
     wind_speed,
     sunrise,
     sunset,
+    moonrise,
+    moonset,
     weather = [],
   } = currentDay
 
@@ -147,6 +167,15 @@ const addWeather = (currentDay, page_uid) => {
       )}`,
     },
   })
+
+  window.roamAlphaAPI.createBlock({
+    location: { 'parent-uid': page_uid, order: 5 },
+    block: {
+      string: `moon:: ${toLocaleTimeString(moonrise)} / ${toLocaleTimeString(
+        moonset
+      )}`,
+    },
+  })
 }
 
 const addAddress = ({ address_components }, page_uid) => {
@@ -169,9 +198,9 @@ const addAddress = ({ address_components }, page_uid) => {
   }
 
   window.roamAlphaAPI.createBlock({
-    location: { 'parent-uid': page_uid, order: 5 },
+    location: { 'parent-uid': page_uid, order: 6 },
     block: {
-      string: `location:: ${getCity(address_components)}, [[${getState(
+      string: `location:: [[${getCity(address_components)}]], [[${getState(
         address_components
       )}]]`,
     },

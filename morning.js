@@ -57,12 +57,19 @@ const writeFields = (page_uid) => {
   window.roamAlphaAPI.updateBlock({
     block: {
       uid: page_uid,
-      string: `${getTime()} [[Morning Walk]] {{word-count}} {{[[POMO]]: 10}}`,
+      string: `${getTime()} [[Morning Walk]]`,
     },
   })
 
   window.roamAlphaAPI.createBlock({
     location: { 'parent-uid': page_uid, order: 0 },
+    block: {
+      string: '{{word-count}} {{[[POMO]]: 10}}',
+    },
+  })
+
+  window.roamAlphaAPI.createBlock({
+    location: { 'parent-uid': page_uid, order: 1 },
     block: {
       string: '',
     },
